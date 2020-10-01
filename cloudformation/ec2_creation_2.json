@@ -1,0 +1,32 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CloudFormation template for creating an ec2 instance",
+   
+    "Parameters":{
+    
+      "InstanceTypeParameter" : {
+      
+        "Type": "String",
+	"Default":"t2.micro",
+	"AllowedValues":["t2.micro"],
+	"Description":"added the type of ec2 instance"
+      
+      }  
+    
+    
+    },
+
+
+    "Resources":{
+       
+"MyEC2Instance" : {
+   "Type" : "AWS::EC2::Instance",
+   "Properties" : {
+      "ImageId" : "ami-03657b56516ab7912",
+      "KeyName" : "aws-test-2",
+      "InstanceType": {"Ref" : "InstanceTypeParameter"}
+
+   }
+}
+    }
+}

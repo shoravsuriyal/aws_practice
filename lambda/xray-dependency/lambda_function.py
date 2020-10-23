@@ -2,6 +2,10 @@ import boto3
 
 dynamodb= boto3.client('dynamodb')
 
+pipeline = boto3.client('codepipeline')
+
+
+
 from aws_xray_sdk.core import xray_recorder
 
 from aws_xray_sdk.core import patch_all
@@ -47,13 +51,14 @@ def lambda_handler(event,cotext):
 
     dynamodb.get_item(TableName='SampleTable', Key={'Name':{'S':"John"},'Age':{'N':"10"}})
 
-    
+    response = pipeline.put_job_success_result(jobId=event['CodePipeline.job']['id'])    
+
     #dynamodb.get_item(TableName='SampleTable2', Key={'Name':{'S':"John"},'Age':{'N':"10"}})
 
     #dynamodb.put_item(TableName='SampleTable',Key={'Name':{'S':'John'}})
 
     print 'I am executed successfully'
-    return None
+    return response
 
 
 

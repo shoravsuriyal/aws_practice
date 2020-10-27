@@ -23,15 +23,10 @@ def lambda_handler(event,cotext):
     #dynamodb.put_item(TableName='SampleTable', Item={"Name": {"S": "Bob"},"Age": {"N": "45"}}) 
     #dynamodb.put_item(TableName='SampleTable', Item={"Name": {"S": "Taylor"},"Age": {"N": "32"}})
 
-    with xray_recorder.in_segment('Dynamodb') as segment:
-    # Add metadata or annotation here if necessary
-    segment.put_metadata('key', dict, 'namespace')
-    with xray_recorder.in_subsegment('Table-get-operation') as subsegment:
-        subsegment.put_annotation('key', 'value')
-        # Do something here
-        response = dynamodb.get_item(TableName='SampleTable', Key={'Name':{'S':"John"},'Age':{'N':"10"}})
 
     #dynamodb.put_item(TableName='SampleTable',Key={'Name':{'S':'John'}})
+
+    
 
     print 'I am executed successfully'
     return response

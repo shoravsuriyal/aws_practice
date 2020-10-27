@@ -2,14 +2,25 @@ import boto3
 
 dynamodb= boto3.client('dynamodb')
 
+table = boto3.resource('dynamodb').Table('SampleTable')
+
 pipeline = boto3.client('codepipeline')
 
+sqs=boto3.client('sqs')
 
+queue_url='https://sqs.us-east-2.amazonaws.com/496585200392/xray-sdk'
+
+num=10
+
+from boto3.dynamodb.conditions import Key
 
 from aws_xray_sdk.core import xray_recorder
 
 from aws_xray_sdk.core import patch_all
 patch_all()
+
+
+
 
 @xray_recorder.capture('dynamodb')
 def lambda_handler(event,cotext):
@@ -49,9 +60,67 @@ def lambda_handler(event,cotext):
 
 
 
-    dynamodb.get_item(TableName='SampleTable', Key={'Name':{'S':"John"},'Age':{'N':"10"}})
+    result=dynamodb.get_item(TableName='SampleTable', Key={'Name':{'S':"John"},'Age':{'N':"10"}},ConsistentRead=True)
+    
 
-    response = pipeline.put_job_success_result(jobId=event['CodePipeline.job']['id'])    
+    #getsqsdata=table.query(KeyConditionExpression=Key('Name').eq('John')) 
+    
+
+    #### Time Consuming code 
+
+    d= table.scan()
+    def getsqsdata(k,d):
+
+        if k in d:
+
+            return d[k]
+
+        for v in d.values():
+
+            if isinstance(v,dict):
+
+                res=getsqsdata(k,v)
+
+                if res is not None:
+
+                    return res
+        return None
+
+    #### 
+
+    print type(getsqsdata)
+    
+    print "==========================="
+
+    print getsqsdata
+
+    print "========End Of Data========"
+
+    
+     
+    response= sqs.send_message(
+        
+        QueueUrl=queue_url,
+        MessageAttributes={
+            'Name':{
+                'DataType':'String',
+                
+                'StringValue':getsqsdata['Items'][0]['Name'],
+                
+            },
+            
+            'Age':{
+                'DataType':'String',
+                
+                'StringValue':str(getsqsdata['Items'][-1]['Age']),
+                
+            }},
+            
+            MessageBody=('Pushing the data to sqs')
+    
+        )
+    
+    response1 = pipeline.put_job_success_result(jobId=event['CodePipeline.job']['id'])    
 
     #dynamodb.get_item(TableName='SampleTable2', Key={'Name':{'S':"John"},'Age':{'N':"10"}})
 

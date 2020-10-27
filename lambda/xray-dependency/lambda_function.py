@@ -68,23 +68,8 @@ def lambda_handler(event,cotext):
 
     #### Time Consuming code 
 
-    d= table.scan()
-    def getsqsdata(k,d):
+    getsqsdata= table.scan(FilterExpression=Attr('Name').eq('John'))
 
-        if k in d:
-
-            return d[k]
-
-        for v in d.values():
-
-            if isinstance(v,dict):
-
-                res=getsqsdata(k,v)
-
-                if res is not None:
-
-                    return res
-        return None
 
     #### 
 
